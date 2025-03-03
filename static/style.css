@@ -1,0 +1,12 @@
+body {
+    background-color: #f8f9fa;
+}
+.container {
+    max-width: 900px;
+}
+.navbar-brand {
+    font-weight: bold;
+}
+.list-group-item {
+    word-wrap: break-word;
+}
