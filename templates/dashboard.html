@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h1>Dashboard</h1>
 <p>Welcome, @{{ username }}!</p>
@@ -17,7 +18,7 @@
         <form method="POST" action="{{ url_for('set_target') }}">
             <div class="form-group">
                 <label for="target_profile">Target Profile URL</label>
-                <input type="text" class="form-control" id="target_profile" name="target_profile" value="{{ target_profile }}" placeholder="https://twitter.com/username" required>
+                <input type="text" class="form-control" id="target_profile" name="target_profile" value="{{ target_profile }}" placeholder="https://x.com/username" required>
             </div>
             <div class="form-group">
                 <label for="daily_follow_limit">Daily Follow Limit</label>
@@ -32,20 +33,25 @@
                 <label class="form-check-label" for="filter_active">Follow only active users (last 30 days)</label>
             </div>
             <button type="submit" class="btn btn-primary mt-2">Save Settings</button>
-            <a href="{{ url_for('run_now', task='follow') }}" class="btn btn-success mt-2">Run Follow Now</a>
-            <a href="{{ url_for('run_now', task='unfollow') }}" class="btn btn-warning mt-2">Run Unfollow Now</a>
         </form>
 
-        <h3>Whitelist</h3>
-        <form method="POST" action="{{ url_for('add_whitelist') }}" class="form-inline mb-2">
-            <input type="text" class="form-control mr-2" name="whitelist_user" placeholder="@username" required>
+        <h3>Bot Control</h3>
+        <form method="POST" action="{{ url_for('toggle_bot') }}">
+            <button type="submit" class="btn btn-{{ 'success' if not bot_active else 'danger' }} mt-2">
+                {{ 'Start Bot' if not bot_active else 'Stop Bot' }}
+            </button>
+        </form>
+
+        <h3>Whitelisted Users</h3>
+        <form method="POST" action="{{ url_for('add_whitelisted') }}" class="form-inline mb-2">
+            <input type="text" class="form-control mr-2" name="whitelisted_user" placeholder="@username" required>
             <button type="submit" class="btn btn-secondary">Add</button>
         </form>
         <ul class="list-group">
-            {% for user in whitelist %}
+            {% for user in whitelisted_users %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 @{{ user.screen_name }}
-                <form method="POST" action="{{ url_for('remove_whitelist', user_id=user.user_id) }}">
+                <form method="POST" action="{{ url_for('remove_whitelisted', user_id=user.user_id) }}">
                     <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                 </form>
             </li>
@@ -60,4 +66,14 @@
     <li class="list-group-item">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}: {{ log.message }}</li>
     {% endfor %}
 </ul>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 {% endblock %}
